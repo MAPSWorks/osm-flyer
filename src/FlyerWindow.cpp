@@ -131,25 +131,26 @@ void FlyerWindow::processEvent(sf::Event const& Event)
     }
     else if(Event.Type == sf::Event::KeyPressed)
     {
+        float elapsedTime = App.GetFrameTime();
         if(Event.Key.Code == sf::Key::Escape)
         {
             App.Close();
         }
         else if(Event.Key.Code == sf::Key::Right)
         {
-            cam.rotate(-0.1);
+            cam.rotate(-1.0 * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::Left)
         {
-            cam.rotate(0.1);
+            cam.rotate(1.0 * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::Up)
         {
-            cam.moveForward(2.0);
+            cam.moveForward(10.0 * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::Down)
         {
-            cam.moveBackward(2.0);
+            cam.moveBackward(10.0 * elapsedTime);
         }
     }
     else if(Event.Type == sf::Event::Resized)

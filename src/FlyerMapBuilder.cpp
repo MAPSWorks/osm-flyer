@@ -23,12 +23,20 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
     }
     {
         sf::Lock DownloadLock(DownloadedMutex);
+        // Find Row
         OSMTextureMap::iterator firstKey = downloadedTiles.find(x);
         if(downloadedTiles.end() != firstKey)
         {
+            // Find Column
             TextureMap::iterator secondKey = (*firstKey).second.find(y);
             if((*firstKey).second.end() != secondKey)
             {
+                // Texture hasn't been loaded yet 
+                if(0 == (*secondKey).second)
+                {
+                    (*secondKey).second = loadTextureRAW("thread-test.bmp");
+                }
+
                 return (*secondKey).second;
             }
         }
@@ -42,7 +50,7 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
 
     return defaultTexture;
 }
-
+;
 void FlyerMapBuilder::Run()
 {
     while(building)
@@ -65,13 +73,15 @@ void FlyerMapBuilder::Run()
 
             {
                 sf::Lock DownloadLock(DownloadedMutex);
-                downloadedTiles[x][y] = defaultTexture;
+                downloadedTiles[x][y] = 0;
             }
 
             {
                 sf::Lock QueueLock(QueueMutex);
                 tileQueue.pop_front();
             }
+
+            sf::Sleep(0.5f);
         }
     }
 }
