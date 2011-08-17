@@ -12,6 +12,7 @@ FlyerWindow::FlyerWindow()
     glClearColor(0.7f,0.8f,1.0f,0.0f);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
     glDepthMask(GL_TRUE);
 
     glMatrixMode(GL_PROJECTION);
@@ -80,16 +81,7 @@ void FlyerWindow::paint()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glColor3f(1.0f,1.0f,1.0f);
-    glTranslatef(cam.getX(),0.0f,cam.getZ());
-
-    glBegin(GL_QUADS);
-        glVertex3f(-500.0,0.0,-500.0);
-        glVertex3f(-500.0,0.0,500.0);
-        glVertex3f(500.0,0.0,500.0);
-        glVertex3f(500.0,0.0,-500.0);
-    glEnd();
-
+    //glTranslatef(cam.getX(),0.0f,cam.getZ());
     map.paint();
 }
 
