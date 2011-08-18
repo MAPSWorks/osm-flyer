@@ -43,6 +43,7 @@ void FlyerWindow::run()
 
         cam.look();
         App.SetActive();
+        map.setCenter(cam.getX(),cam.getZ());
         paint();
         App.Display();
     }

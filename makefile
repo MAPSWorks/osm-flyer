@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Wall
-LIBS=-lsfml-graphics -lsfml-window -lsfml-system -lGLU
+LIBS=-lsfml-graphics -lsfml-window -lsfml-system -lGLU -lm
 INCPATH=
 SRCDIR=src/
 

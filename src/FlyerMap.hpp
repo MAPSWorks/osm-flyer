@@ -8,15 +8,16 @@ class FlyerMap
         FlyerMap();
         ~FlyerMap();
         void paint();
+        void setCenter(float const& x, float const& z);
     private:
-        float centerLat;
-        float centerLong;
+        float centerX;
+        float centerZ;
         unsigned int zoom;
         FlyerMapBuilder mapBuilder;
-        float xpos2lat(float const& xpos);
-        float ypos2long(float const& ypos);
-        float lat2xpos(float const& lat);
-        float long2ypos(float const& lng);
+        float xpos2lat(float const& xpos,int zoom);
+        float zpos2long(float const& zpos, int zoom);
+        float lat2xpos(float const& lat,int zoom);
+        float long2zpos(float const& lng,int zoom);
         int long2tilex(float const& lng, int zoom);
         int lat2tiley(float const& lng, int zoom);
         float tilex2long(int tilex, int zoom);
