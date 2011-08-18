@@ -8,15 +8,18 @@ class FlyerWindow
 {
     public:
         FlyerWindow();
+        FlyerWindow(int z);
         ~FlyerWindow();
         void run();
         void paint();
         void processEvent(sf::Event const& Event);
 
     private:
-        sf::Window App;
-        FlyerCamera cam;
+        unsigned int zoom;
         FlyerMap map;
+        FlyerCamera cam;
+        sf::Window App;
+        void init();
         void drawCube();
         void drawDiscoFloor();
 };

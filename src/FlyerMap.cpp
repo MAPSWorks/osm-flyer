@@ -1,9 +1,14 @@
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "FlyerMap.hpp"
-#include <iostream>
-#include <math.h>
+#include "FlyerConverter.hpp"
 
-FlyerMap::FlyerMap():centerX(0.0),centerZ(0.0),zoom(5)
+FlyerMap::FlyerMap():centerX(0.0),centerZ(0.0),zoom(5),mapBuilder(zoom)
+{
+    mapBuilder.Launch();
+}
+
+FlyerMap::FlyerMap(int z):centerX(0.0),centerZ(0.0),zoom(z),mapBuilder(zoom)
 {
     mapBuilder.Launch();
 }
@@ -16,12 +21,13 @@ FlyerMap::~FlyerMap()
 void FlyerMap::paint()
 {
     glPushMatrix();
-    unsigned int const width = 128;
+    unsigned int const width = 64;
     unsigned int const radius = width*4;
-    int centerTileX = long2tilex(zpos2long(centerZ,zoom),zoom);
-    int centerTileY = lat2tiley(xpos2lat(centerX,zoom),zoom);
-    float drawX = lat2xpos(tiley2lat(centerTileY,zoom),zoom);
-    float drawZ = long2zpos(tilex2long(centerTileX,zoom),zoom);
+    int centerTileX = pos2tile(centerX);
+    int centerTileY = pos2tile(centerZ);
+
+    float drawX = tile2pos(centerTileX);
+    float drawZ = tile2pos(centerTileY);
     
     for(float i = drawX - radius;
             i < drawX + radius + 1;
@@ -31,17 +37,20 @@ void FlyerMap::paint()
                 j < drawZ + radius + 1;
                 j += width)
         {
-            GLuint tile = mapBuilder.getTile(i,j);
+            int currentTileX = pos2tile(i);
+            int currentTileY = pos2tile(j);
+
+            GLuint tile = mapBuilder.getTile(currentTileX,currentTileY);
             glBindTexture(GL_TEXTURE_2D,tile);
             glBegin(GL_QUADS);
                 glTexCoord2f(0.0,0.0); 
                 glVertex3f(i,0.0,j);
                 glTexCoord2f(0.0,1.0); 
-                glVertex3f(i,0.0,j+128);
+                glVertex3f(i,0.0,j+width);
                 glTexCoord2f(1.0,1.0); 
-                glVertex3f(i+128,0.0,j+128);
+                glVertex3f(i+width,0.0,j+width);
                 glTexCoord2f(1.0,0.0); 
-                glVertex3f(i+128,0.0,j);
+                glVertex3f(i+width,0.0,j);
             glEnd();
         }
     }
@@ -52,45 +61,4 @@ void FlyerMap::setCenter(float const& x, float const& z)
 {
     centerX = x;
     centerZ = z;
-}
-
-float FlyerMap::xpos2lat(float const& xpos,int zoom)
-{
-    return tiley2lat(xpos/2,zoom);
-}
-
-float FlyerMap::zpos2long(float const& zpos,int zoom)
-{
-    return tilex2long(zpos/2,zoom);
-}
-
-float FlyerMap::lat2xpos(float const& lat, int zoom)
-{
-    return lat2tiley(lat,zoom) * 2;
-}
-
-float FlyerMap::long2zpos(float const& lng, int zoom)
-{
-    return long2tilex(lng,zoom) * 2;
-}
-
-int FlyerMap::long2tilex(float const& lng, int z)
-{
-    return (int)(floor((lng + 180.0) / 360.0 * pow(2.0,z)));
-}
-
-int FlyerMap::lat2tiley(float const& lat, int z)
-{
-    return (int)(floor((1.0 - log(tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * pow(2.0,z)));
-}
-
-float FlyerMap::tilex2long(int tilex, int z)
-{
-    return tilex / pow(2.0,z) * 360.0 - 180.0;
-}
-
-float FlyerMap::tiley2lat(int tiley, int z)
-{
-    float n = M_PI - 2.0 * M_PI * tiley / pow(2.0,z);
-    return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }

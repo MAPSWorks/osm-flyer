@@ -6,8 +6,13 @@
 #include<string>
 #include<SFML/Graphics.hpp>
 #include"FlyerMapBuilder.hpp"
+#include"OSMConnection.hpp"
 
-FlyerMapBuilder::FlyerMapBuilder():building(true),defaultTexture(0)
+FlyerMapBuilder::FlyerMapBuilder():building(true),defaultTexture(0),zoom(5)
+{
+}
+
+FlyerMapBuilder::FlyerMapBuilder(int z):building(true),defaultTexture(0),zoom(z)
 {
 }
 
@@ -20,6 +25,14 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
     if(0 == defaultTexture)
     {
         defaultTexture = loadTextureRAW("default.bmp");
+    }
+    if(x < 0)
+    {
+        return defaultTexture;
+    }
+    if(y < 0)
+    {
+        return defaultTexture;
     }
     {
         sf::Lock DownloadLock(DownloadedMutex);
@@ -34,7 +47,7 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
                 // Texture hasn't been loaded yet 
                 if(0 == (*secondKey).second)
                 {
-                    (*secondKey).second = loadTextureRAW("thread-test.bmp");
+                    (*secondKey).second = loadTextureRAW(osmConnection.getFilenameString(zoom,x,y));
                 }
 
                 return (*secondKey).second;
@@ -50,7 +63,7 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
 
     return defaultTexture;
 }
-;
+
 void FlyerMapBuilder::Run()
 {
     while(building)
@@ -71,6 +84,7 @@ void FlyerMapBuilder::Run()
             int x = nextTile.first;
             int y = nextTile.second;
 
+            osmConnection.getImage(zoom,x,y);
             {
                 sf::Lock DownloadLock(DownloadedMutex);
                 downloadedTiles[x][y] = 0;
@@ -80,8 +94,6 @@ void FlyerMapBuilder::Run()
                 sf::Lock QueueLock(QueueMutex);
                 tileQueue.pop_front();
             }
-
-            sf::Sleep(0.5f);
         }
     }
 }

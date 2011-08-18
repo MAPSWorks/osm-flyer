@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[])
 {
-    FlyerWindow flyer;
+    FlyerWindow flyer(10);
     flyer.run();
 
 	return 0;

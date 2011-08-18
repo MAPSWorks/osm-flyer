@@ -2,8 +2,27 @@
 #include <SFML/Graphics.hpp>
 #include "FlyerWindow.hpp"
 #include "FlyerMap.hpp"
+#include "FlyerConverter.hpp"
 
-FlyerWindow::FlyerWindow()
+FlyerWindow::FlyerWindow():zoom(5),map(zoom)
+{
+    init();
+}
+
+FlyerWindow::FlyerWindow(int z):zoom(z),map(zoom)
+{
+    init();
+}
+
+FlyerWindow::~FlyerWindow()
+{
+    if(App.IsOpened())
+    {
+        App.Close();
+    }
+}
+
+void FlyerWindow::init()
 {
     App.Create(sf::VideoMode(800,600,32),"Open Street Map Flyer");
     App.SetFramerateLimit(60);
@@ -19,15 +38,9 @@ FlyerWindow::FlyerWindow()
     glLoadIdentity();
     gluPerspective(90.0f,1.0f,1.0f,500.0f);
 
-    cam.setPosition(0.0,5.0,0.0);
-}
-
-FlyerWindow::~FlyerWindow()
-{
-    if(App.IsOpened())
-    {
-        App.Close();
-    }
+    float startingTileX = 282.0;
+    float startingTileY = 404.0;
+    cam.setPosition(tile2pos(startingTileX),5.0,tile2pos(startingTileY));
 }
 
 void FlyerWindow::run()
