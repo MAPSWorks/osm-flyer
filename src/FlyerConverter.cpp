@@ -31,23 +31,23 @@ float long2zpos(float const& lng, int zoom)
     return long2tilex(lng,zoom) * 128.0;
 }
 
-int long2tilex(float const& lng, int z)
-{
-    return (int)(floor((lng + 180.0) / 360.0 * pow(2.0,z)));
+int long2tilex(float const& lon, int z) 
+{ 
+        return (int)(floor((lon + 180.0) / 360.0 * pow(2.0, z))); 
 }
-
+ 
 int lat2tiley(float const& lat, int z)
-{
-    return (int)(floor((1.0 - log(tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * pow(2.0,z)));
+{ 
+        return (int)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * pow(2.0, z))); 
 }
-
-float tilex2long(int tilex, int z)
+ 
+float tilex2long(int x, int z) 
 {
-    return tilex / pow(2.0,z) * 360.0 - 180.0;
+        return x / pow(2.0, z) * 360.0 - 180;
 }
-
-float tiley2lat(int tiley, int z)
+ 
+float tiley2lat(int y, int z) 
 {
-    float n = M_PI - 2.0 * M_PI * tiley / pow(2.0,z);
-    return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
+        float n = M_PI - 2.0 * M_PI * y / pow(2.0, z);
+            return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }

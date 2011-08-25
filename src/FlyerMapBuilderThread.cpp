@@ -40,10 +40,6 @@ void FlyerMapBuilderThread::Run()
             int x = nextTile.first;
             int y = nextTile.second;
 
-            {
-                sf::Lock DownloadLock(DownloadMutex);
-                downloadedTiles[x][y] = -1;
-            }
             osmConn.getImage(zoom,x,y);
             {
                 sf::Lock DownloadLock(DownloadMutex);

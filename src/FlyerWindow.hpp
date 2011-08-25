@@ -9,6 +9,7 @@ class FlyerWindow
     public:
         FlyerWindow();
         FlyerWindow(int z);
+        FlyerWindow(int z,float const& lat, float const& lon);
         ~FlyerWindow();
         void run();
         void paint();
@@ -19,7 +20,7 @@ class FlyerWindow
         FlyerMap map;
         FlyerCamera cam;
         sf::RenderWindow App;
-        void init();
+        void init(float const& lat=-80.27, float const& lon=36.0);
         void drawCube();
         void drawDiscoFloor();
 };

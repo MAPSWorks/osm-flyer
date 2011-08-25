@@ -14,6 +14,11 @@ FlyerWindow::FlyerWindow(int z):zoom(z),map(zoom)
     init();
 }
 
+FlyerWindow::FlyerWindow(int z,float const& lat,float const& lon):zoom(z),map(zoom)
+{
+    init(lat,lon);
+}
+
 FlyerWindow::~FlyerWindow()
 {
     if(App.IsOpened())
@@ -22,7 +27,7 @@ FlyerWindow::~FlyerWindow()
     }
 }
 
-void FlyerWindow::init()
+void FlyerWindow::init(float const& lat, float const& lon)
 {
     App.Create(sf::VideoMode(800,600,32),"Open Street Map Flyer");
     App.SetFramerateLimit(60);
@@ -38,14 +43,14 @@ void FlyerWindow::init()
     glLoadIdentity();
     gluPerspective(90.0f,1.0f,1.0f,500.0f);
 
-    float startingTileX = 282.0;
-    float startingTileY = 404.0;
+    float startingTileX = long2tilex(lon,zoom);
+    float startingTileY = lat2tiley(lat,zoom);
     cam.setPosition(tile2pos(startingTileX),5.0,tile2pos(startingTileY));
+    cam.look();
 }
 
 void FlyerWindow::run()
 {
-    cam.look();
     while(App.IsOpened())
     {
         sf::Event Event;
@@ -62,79 +67,10 @@ void FlyerWindow::run()
     }
 }
 
-void FlyerWindow::drawDiscoFloor()
-{
-    int colorNumber = 1;
-    for(int startX=-50;startX<50;startX+=25)
-    {
-        for(int startZ=-50;startZ<50;startZ+=25)
-        {
-            glPushMatrix();
-            glTranslatef(startX,0.0f,startZ);
-        
-            sf::Randomizer::SetSeed(colorNumber);
-            float red = sf::Randomizer::Random(0.0f,1.0f);
-            float green = sf::Randomizer::Random(0.0f,1.0f);
-            float blue = sf::Randomizer::Random(0.0f,1.0f);
-            glColor3f(red,green,blue);
-            ++colorNumber;
-
-            glBegin(GL_QUADS);
-                glVertex3f(0.0f,0.0f,0.0f);
-                glVertex3f(25.0f,0.0f,0.0f);
-                glVertex3f(25.0f,0.0f,25.0f);
-                glVertex3f(0.0f,0.0f,25.0f);
-            glEnd();
-
-            glPopMatrix();
-        }
-    }
-}
-
 void FlyerWindow::paint()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //glTranslatef(cam.getX(),0.0f,cam.getZ());
     map.paint();
-}
-
-void FlyerWindow::drawCube()
-{
-    glPushMatrix();
-    glTranslatef(0.0f,0.0f,-200.0f);
-    glBegin(GL_QUADS);
-        glVertex3f(-50.0f,-50.0f,-50.0f); 
-        glVertex3f(-50.0f,50.0f,-50.0f); 
-        glVertex3f(50.0f,50.0f,-50.0f); 
-        glVertex3f(50.0f,-50.0f,-50.0f); 
-
-        glVertex3f(-50.0f,-50.0f,50.0f); 
-        glVertex3f(-50.0f,50.0f,50.0f); 
-        glVertex3f(50.0f,50.0f,50.0f); 
-        glVertex3f(50.0f,-50.0f,50.0f); 
-
-        glVertex3f(-50.0f,-50.0f,-50.0f); 
-        glVertex3f(-50.0f,50.0f,-50.0f); 
-        glVertex3f(-50.0f,50.0f,50.0f); 
-        glVertex3f(-50.0f,-50.0f,50.0f); 
-
-        glVertex3f(50.0f,-50.0f,-50.0f); 
-        glVertex3f(50.0f,50.0f,-50.0f); 
-        glVertex3f(50.0f,50.0f,50.0f); 
-        glVertex3f(50.0f,-50.0f,50.0f); 
-
-        glVertex3f(-50.0f,-50.0f,50.0f); 
-        glVertex3f(-50.0f,-50.0f,-50.0f); 
-        glVertex3f(50.0f,-50.0f,-50.0f); 
-        glVertex3f(50.0f,-50.0f,50.0f); 
-
-        glVertex3f(-50.0f,50.0f,50.0f); 
-        glVertex3f(-50.0f,50.0f,-50.0f); 
-        glVertex3f(50.0f,50.0f,-50.0f); 
-        glVertex3f(50.0f,50.0f,50.0f); 
-    glEnd();
-    glPopMatrix();
 }
 
 void FlyerWindow::processEvent(sf::Event const& Event)
