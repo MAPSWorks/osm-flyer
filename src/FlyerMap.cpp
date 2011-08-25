@@ -5,17 +5,14 @@
 
 FlyerMap::FlyerMap():centerX(0.0),centerZ(0.0),zoom(5),mapBuilder(zoom)
 {
-    mapBuilder.Launch();
 }
 
 FlyerMap::FlyerMap(int z):centerX(0.0),centerZ(0.0),zoom(z),mapBuilder(zoom)
 {
-    mapBuilder.Launch();
 }
 
 FlyerMap::~FlyerMap()
 {
-    mapBuilder.Terminate();
 }
 
 void FlyerMap::paint()
@@ -40,21 +37,26 @@ void FlyerMap::paint()
             int currentTileX = pos2tile(i);
             int currentTileY = pos2tile(j);
 
-            GLuint tile = mapBuilder.getTile(currentTileX,currentTileY);
-            glBindTexture(GL_TEXTURE_2D,tile);
-            glBegin(GL_QUADS);
-                glTexCoord2f(0.0,0.0); 
-                glVertex3f(i,0.0,j);
-                glTexCoord2f(0.0,1.0); 
-                glVertex3f(i,0.0,j+width);
-                glTexCoord2f(1.0,1.0); 
-                glVertex3f(i+width,0.0,j+width);
-                glTexCoord2f(1.0,0.0); 
-                glVertex3f(i+width,0.0,j);
-            glEnd();
+            GLuint tile = (GLuint) mapBuilder.getTile(currentTileX,currentTileY);
+            printTile(tile,i,j,width);
         }
     }
     glPopMatrix();
+}
+
+void FlyerMap::printTile(GLuint tile,int x, int z, int w)
+{
+    glBindTexture(GL_TEXTURE_2D,tile);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0,0.0); 
+        glVertex3f(x,0.0,z);
+        glTexCoord2f(0.0,1.0); 
+        glVertex3f(x,0.0,z+w);
+        glTexCoord2f(1.0,1.0); 
+        glVertex3f(x+w,0.0,z+w);
+        glTexCoord2f(1.0,0.0); 
+        glVertex3f(x+w,0.0,z);
+    glEnd();
 }
 
 void FlyerMap::setCenter(float const& x, float const& z)

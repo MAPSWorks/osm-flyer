@@ -166,6 +166,14 @@ void FlyerWindow::processEvent(sf::Event const& Event)
         {
             cam.moveBackward(10.0 * elapsedTime);
         }
+        else if(Event.Key.Code == sf::Key::W)
+        {
+            cam.moveUp(10.0 * elapsedTime);
+        }
+        else if(Event.Key.Code == sf::Key::S)
+        {
+            cam.moveDown(10.0 * elapsedTime);
+        }
     }
     else if(Event.Type == sf::Event::Resized)
     {

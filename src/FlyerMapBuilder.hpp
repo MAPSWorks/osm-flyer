@@ -1,32 +1,29 @@
 #ifndef FLYERMAPBUILDER_H
 #define FLYERMAPBUILDER_H
-#include<deque>
-#include<map>
-#include<utility>
-#include<stdio.h>
-#include<string>
-#include<SFML/System.hpp>
-#include"OSMConnection.hpp"
-typedef std::map<int,GLuint> TextureMap;
-typedef std::map<int,TextureMap > OSMTextureMap;
-typedef std::deque<std::pair<int,int> > OSMTextureQueue;
-class FlyerMapBuilder : public sf::Thread
+#include <deque>
+#include <map>
+#include <utility>
+#include <string>
+#include <SFML/System.hpp>
+#include "FlyerMapBuilderThread.hpp"
+
+class FlyerMapBuilder 
 {
     public:
         FlyerMapBuilder();
         FlyerMapBuilder(int z);
         ~FlyerMapBuilder();
-        GLuint getTile(int x, int y); 
-        virtual void Run();
+        int getTile(int x, int y); 
     private:
         OSMTextureQueue tileQueue;
         OSMTextureMap downloadedTiles;
-        sf::Mutex DownloadedMutex;
+        sf::Mutex DownloadMutex;
         sf::Mutex QueueMutex;
-        bool building;
         GLuint defaultTexture;
         GLuint loadTextureRAW(std::string const& filename);
-        OSMConnection osmConnection;
         unsigned int zoom;
+        int numTiles;
+        FlyerMapBuilderThread builderThreadA;
+        FlyerMapBuilderThread builderThreadB;
 };
 #endif

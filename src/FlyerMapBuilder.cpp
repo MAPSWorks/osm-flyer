@@ -1,41 +1,53 @@
-#include<deque>
-#include<map>
-#include<utility>
-#include<iostream>
-#include<stdio.h>
-#include<string>
-#include<SFML/Graphics.hpp>
-#include"FlyerMapBuilder.hpp"
-#include"OSMConnection.hpp"
+#include <deque>
+#include <map>
+#include <utility>
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <math.h>
+#include <algorithm>
+#include <SFML/Graphics.hpp>
+#include "FlyerMapBuilder.hpp"
+#include "FlyerMapBuilderThread.hpp"
 
-FlyerMapBuilder::FlyerMapBuilder():building(true),defaultTexture(0),zoom(5)
+FlyerMapBuilder::FlyerMapBuilder():defaultTexture(0),zoom(5),
+    numTiles(pow(2.0,zoom)),
+    builderThreadA(zoom,tileQueue,QueueMutex,downloadedTiles,DownloadMutex),
+    builderThreadB(zoom,tileQueue,QueueMutex,downloadedTiles,DownloadMutex)
 {
+    builderThreadA.Launch();
+    builderThreadB.Launch();
 }
 
-FlyerMapBuilder::FlyerMapBuilder(int z):building(true),defaultTexture(0),zoom(z)
+FlyerMapBuilder::FlyerMapBuilder(int z):defaultTexture(0),
+    zoom(z),numTiles(pow(2.0,zoom)),
+    builderThreadA(zoom,tileQueue,QueueMutex,downloadedTiles,DownloadMutex),
+    builderThreadB(zoom,tileQueue,QueueMutex,downloadedTiles,DownloadMutex)
 {
+
+    builderThreadA.Launch();
+    builderThreadB.Launch();
 }
 
 FlyerMapBuilder::~FlyerMapBuilder()
 {
+    builderThreadA.Terminate();
+    builderThreadB.Terminate();
 }
 
-GLuint FlyerMapBuilder::getTile(int x,int y)
+int FlyerMapBuilder::getTile(int x,int y)
 {
     if(0 == defaultTexture)
     {
         defaultTexture = loadTextureRAW("default.bmp");
     }
-    if(x < 0)
+    if(x < 0 || y < 0 || x > numTiles - 1 
+            || y > numTiles - 1)
     {
         return defaultTexture;
     }
-    if(y < 0)
     {
-        return defaultTexture;
-    }
-    {
-        sf::Lock DownloadLock(DownloadedMutex);
+        sf::Lock DownloadLock(DownloadMutex);
         // Find Row
         OSMTextureMap::iterator firstKey = downloadedTiles.find(x);
         if(downloadedTiles.end() != firstKey)
@@ -47,55 +59,33 @@ GLuint FlyerMapBuilder::getTile(int x,int y)
                 // Texture hasn't been loaded yet 
                 if(0 == (*secondKey).second)
                 {
-                    (*secondKey).second = loadTextureRAW(osmConnection.getFilenameString(zoom,x,y));
+                    (*secondKey).second = loadTextureRAW(builderThreadA.getFilenameString(zoom,x,y));
+                    return (*secondKey).second;
                 }
-
-                return (*secondKey).second;
+                // Texture is downloading
+                else if(-1 == (*secondKey).second)
+                {
+                    return defaultTexture;
+                }
+                // Texture is loaded
+                else
+                { 
+                    return (*secondKey).second;
+                }
             }
         }
     }
-
+    
     std::pair<int,int> newTile(x,y);
     {
         sf::Lock QueueLock(QueueMutex);
-        tileQueue.push_back(newTile);
+        if(tileQueue.end() == find(tileQueue.begin(), tileQueue.end(), newTile))
+        {
+            tileQueue.push_back(newTile);
+        }
     }
 
     return defaultTexture;
-}
-
-void FlyerMapBuilder::Run()
-{
-    while(building)
-    {
-        bool hasTiles;
-        {
-            sf::Lock QueueLock(QueueMutex);
-            hasTiles = !tileQueue.empty();
-        }
-
-        if(hasTiles)
-        {
-            std::pair<int,int> nextTile;
-            {
-                sf::Lock QueueLock(QueueMutex);
-                nextTile = tileQueue.front();
-            }
-            int x = nextTile.first;
-            int y = nextTile.second;
-
-            osmConnection.getImage(zoom,x,y);
-            {
-                sf::Lock DownloadLock(DownloadedMutex);
-                downloadedTiles[x][y] = 0;
-            }
-
-            {
-                sf::Lock QueueLock(QueueMutex);
-                tileQueue.pop_front();
-            }
-        }
-    }
 }
 
 GLuint FlyerMapBuilder::loadTextureRAW(std::string const& filename)
@@ -103,7 +93,11 @@ GLuint FlyerMapBuilder::loadTextureRAW(std::string const& filename)
     sf::Image TextureImage;
     if (!TextureImage.LoadFromFile(filename))
     {
-        return 0;
+        if(remove(filename.c_str()) != 0)
+        {
+            std::cerr << "Error deliting file " << filename << std::endl;
+            return 0;
+        }
     }
     GLuint texture = 0;
 

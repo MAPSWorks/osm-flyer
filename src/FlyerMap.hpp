@@ -15,5 +15,6 @@ class FlyerMap
         float centerZ;
         unsigned int zoom;
         FlyerMapBuilder mapBuilder;
+        void printTile(GLuint tile,int x,int z,int w);
 };
 #endif

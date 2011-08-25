@@ -2,10 +2,33 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <stdio.h>
+#include <SFML/Graphics.hpp>
 #include "OSMConnection.hpp"
+
+OSMConnection::OSMConnection():cacheDir("/tmp/osmflyer/tiles/"),uri("http://a.tile.openstreetmap.org/")
+{
+    char command[PATH_MAX];
+    sprintf(command,"mkdir -p %s",cacheDir.c_str());
+    system(command);
+}
 
 bool OSMConnection::getImage(int zoom, int x, int y)
 {
+    std::string filename = getFilenameString(zoom,x,y);
+    FILE* fp = NULL;
+    fp = fopen(filename.c_str(),"rb");
+    if(fp != NULL)
+    {
+        fseek(fp,0L,SEEK_END);
+        size_t const size = ftell(fp);
+        fclose(fp);
+        if(size > 0)
+        {
+            return true;
+        }
+    }
+
     CURL* curl;
     CURLcode res;
 

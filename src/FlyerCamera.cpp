@@ -47,3 +47,13 @@ void FlyerCamera::moveBackward(float const& step)
     xpos -= sin(angle) * step;
     zpos -= cos(angle) * step;
 }
+
+void FlyerCamera::moveUp(float const& step)
+{
+    ypos += step;
+}
+
+void FlyerCamera::moveDown(float const& step)
+{
+    ypos -= step;
+}

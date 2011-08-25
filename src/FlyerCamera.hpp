@@ -18,6 +18,8 @@ class FlyerCamera
         void look();
         void moveForward(float const& step=1.0f);
         void moveBackward(float const& step=1.0f);
+        void moveUp(float const& step=1.0);
+        void moveDown(float const& step=1.0);
         float const& getX(){ return xpos; }
         float const& getY(){ return ypos; }
         float const& getZ(){ return zpos; }
