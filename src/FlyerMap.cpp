@@ -19,7 +19,7 @@ void FlyerMap::paint()
 {
     glPushMatrix();
     unsigned int const width = 64;
-    unsigned int const radius = width*4;
+    unsigned int const radius = width*3;
     int centerTileX = pos2tile(centerX);
     int centerTileY = pos2tile(centerZ);
 

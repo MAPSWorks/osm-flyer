@@ -18,7 +18,7 @@ class FlyerWindow
         unsigned int zoom;
         FlyerMap map;
         FlyerCamera cam;
-        sf::Window App;
+        sf::RenderWindow App;
         void init();
         void drawCube();
         void drawDiscoFloor();

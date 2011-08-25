@@ -19,6 +19,7 @@ class FlyerMapBuilderThread : public sf::Thread
         ~FlyerMapBuilderThread();
         virtual void Run();
         std::string getFilenameString(int zoom, int x, int y);
+        void stopBuilding();
     private:
         OSMConnection osmConn;
         OSMTextureQueue& tileQueue;

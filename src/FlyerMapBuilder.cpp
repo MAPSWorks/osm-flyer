@@ -31,8 +31,10 @@ FlyerMapBuilder::FlyerMapBuilder(int z):defaultTexture(0),
 
 FlyerMapBuilder::~FlyerMapBuilder()
 {
-    builderThreadA.Terminate();
-    builderThreadB.Terminate();
+    builderThreadA.stopBuilding();
+    builderThreadB.stopBuilding();
+    builderThreadA.Wait();
+    builderThreadB.Wait();
 }
 
 int FlyerMapBuilder::getTile(int x,int y)
@@ -41,11 +43,14 @@ int FlyerMapBuilder::getTile(int x,int y)
     {
         defaultTexture = loadTextureRAW("default.bmp");
     }
+
+    // Outside bounds of map
     if(x < 0 || y < 0 || x > numTiles - 1 
             || y > numTiles - 1)
     {
         return defaultTexture;
     }
+
     {
         sf::Lock DownloadLock(DownloadMutex);
         // Find Row
@@ -59,8 +64,12 @@ int FlyerMapBuilder::getTile(int x,int y)
                 // Texture hasn't been loaded yet 
                 if(0 == (*secondKey).second)
                 {
-                    (*secondKey).second = loadTextureRAW(builderThreadA.getFilenameString(zoom,x,y));
-                    return (*secondKey).second;
+                    GLuint result = loadTextureRAW(builderThreadA.getFilenameString(zoom,x,y));
+                    if(result != 0)
+                    {
+                        (*secondKey).second = result;
+                        return (*secondKey).second;
+                    }
                 }
                 // Texture is downloading
                 else if(-1 == (*secondKey).second)
@@ -78,11 +87,12 @@ int FlyerMapBuilder::getTile(int x,int y)
     
     std::pair<int,int> newTile(x,y);
     {
+        sf::Lock DownloadLock(DownloadMutex);
+        downloadedTiles[x][y] = -1;
+    }
+    {
         sf::Lock QueueLock(QueueMutex);
-        if(tileQueue.end() == find(tileQueue.begin(), tileQueue.end(), newTile))
-        {
-            tileQueue.push_back(newTile);
-        }
+        tileQueue.push_back(newTile);
     }
 
     return defaultTexture;
@@ -95,9 +105,9 @@ GLuint FlyerMapBuilder::loadTextureRAW(std::string const& filename)
     {
         if(remove(filename.c_str()) != 0)
         {
-            std::cerr << "Error deliting file " << filename << std::endl;
-            return 0;
+            std::cerr << "Error deleting file " << filename << std::endl;
         }
+        return 0;
     }
     GLuint texture = 0;
 

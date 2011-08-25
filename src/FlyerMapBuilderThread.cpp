@@ -49,6 +49,9 @@ void FlyerMapBuilderThread::Run()
                 sf::Lock DownloadLock(DownloadMutex);
                 downloadedTiles[x][y] = 0;
             }
+        }else
+        {
+            sf::Sleep(1.5f);
         }
     }
 }
@@ -56,4 +59,9 @@ void FlyerMapBuilderThread::Run()
 std::string FlyerMapBuilderThread::getFilenameString(int zoom,int x,int y)
 {
     return osmConn.getFilenameString(zoom,x,y);
+}
+
+void FlyerMapBuilderThread::stopBuilding()
+{
+    building = false;
 }
