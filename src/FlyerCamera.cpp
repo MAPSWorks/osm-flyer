@@ -1,8 +1,7 @@
+#include <math.h>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "FlyerCamera.hpp"
-#include <iostream>
-
-#define PI 3.1459
 
 void FlyerCamera::setPosition(float const& x, float const& y, float const& z)
 {
@@ -14,13 +13,13 @@ void FlyerCamera::setPosition(float const& x, float const& y, float const& z)
 void FlyerCamera::rotate(float const& angleDiff)
 {
     angle += angleDiff;
-    if(angle > 2*PI)
+    if(angle > 2*M_PI)
     {
-        angle = angle - 2*PI;
+        angle = angle - 2*M_PI;
     }
     else if(angle < 0.0)
     {
-        angle = 2*PI + angle;
+        angle = 2*M_PI + angle;
     }
 }
 
