@@ -1,34 +1,35 @@
 #include <math.h>
 #include "FlyerConverter.hpp"
 
+
 int pos2tile(float const& pos)
 {
-    return floor(pos / 64.0);
+    return floor(pos / TILE_WIDTH);
 }
 
 float tile2pos(int tile)
 {
-    return tile * 64.0;
+    return tile * TILE_WIDTH;
 }
 
 float xpos2lat(float const& xpos,int zoom)
 {
-    return tiley2lat(xpos / 128.0,zoom);
+    return tiley2lat(xpos / TILE_WIDTH,zoom);
 }
 
 float zpos2long(float const& zpos,int zoom)
 {
-    return tilex2long(zpos / 128.0,zoom);
+    return tilex2long(zpos / TILE_WIDTH,zoom);
 }
 
 float lat2xpos(float const& lat, int zoom)
 {
-    return lat2tiley(lat,zoom) * 128.0;
+    return lat2tiley(lat,zoom) * TILE_WIDTH;
 }
 
 float long2zpos(float const& lng, int zoom)
 {
-    return long2tilex(lng,zoom) * 128.0;
+    return long2tilex(lng,zoom) * TILE_WIDTH;
 }
 
 int long2tilex(float const& lon, int z) 

@@ -4,17 +4,17 @@
 #include "FlyerMap.hpp"
 #include "FlyerConverter.hpp"
 
-FlyerWindow::FlyerWindow():zoom(5),map(zoom)
+FlyerWindow::FlyerWindow():zoom(5),speed(10.0),map(zoom)
 {
     init();
 }
 
-FlyerWindow::FlyerWindow(int z):zoom(z),map(zoom)
+FlyerWindow::FlyerWindow(int z):zoom(z),speed(10.0),map(zoom)
 {
     init();
 }
 
-FlyerWindow::FlyerWindow(int z,float const& lat,float const& lon):zoom(z),map(zoom)
+FlyerWindow::FlyerWindow(int z,float const& lat,float const& lon):zoom(z),speed(10.0),map(zoom)
 {
     init(lat,lon);
 }
@@ -29,30 +29,33 @@ FlyerWindow::~FlyerWindow()
 
 void FlyerWindow::init(float const& lat, float const& lon)
 {
-    App.Create(sf::VideoMode(800,600,32),"Open Street Map Flyer");
+    App.Create(sf::VideoMode(800,600,32),"OpenStreetMap Flyer");
     App.SetFramerateLimit(60);
 
-    glClearDepth(10.0f);
-    glClearColor(0.7f,0.8f,1.0f,0.0f);
-
-    glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0f);
+    glClearColor(0.7f,0.8f,1.0f,0.0f);
     glDepthMask(GL_TRUE);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(90.0f,1.0f,1.0f,500.0f);
+    gluPerspective(90.0f,1.0f,1.0f,1000.0f);
 
     float startingTileX = long2tilex(lon,zoom);
     float startingTileY = lat2tiley(lat,zoom);
-    cam.setPosition(tile2pos(startingTileX),5.0,tile2pos(startingTileY));
+    cam.setPosition(tile2pos(startingTileX),100.0,tile2pos(startingTileY));
     cam.look();
 }
 
 void FlyerWindow::run()
 {
+    App.SetActive();
     while(App.IsOpened())
     {
+        float const elapsedTime = App.GetFrameTime();
+        cam.moveForward(speed * elapsedTime);
+        bool isTurning = false;
         sf::Event Event;
         while(App.GetEvent(Event))
         {
@@ -60,17 +63,16 @@ void FlyerWindow::run()
         }
 
         cam.look();
-        App.SetActive();
-        map.setCenter(cam.getX(),cam.getZ());
         paint();
         App.Display();
+        //std::cerr << (1.0 / App.GetFrameTime()) << std::endl;
     }
 }
 
 void FlyerWindow::paint()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    map.paint();
+    map.paint(cam.getX(),cam.getZ());
 }
 
 void FlyerWindow::processEvent(sf::Event const& Event)
@@ -81,34 +83,48 @@ void FlyerWindow::processEvent(sf::Event const& Event)
     }
     else if(Event.Type == sf::Event::KeyPressed)
     {
-        float elapsedTime = App.GetFrameTime();
+        float const moveSpeed = 20.0;
+        float const rotateSpeed = 2.0;
+        float const tiltSpeed = 0.5;
+        float const elapsedTime = App.GetFrameTime();
+
         if(Event.Key.Code == sf::Key::Escape)
         {
             App.Close();
         }
         else if(Event.Key.Code == sf::Key::Right)
         {
-            cam.rotate(-1.0 * elapsedTime);
+            cam.rotate(-rotateSpeed * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::Left)
         {
-            cam.rotate(1.0 * elapsedTime);
+            cam.rotate(rotateSpeed * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::Up)
         {
-            cam.moveForward(10.0 * elapsedTime);
+            //cam.moveForward(moveSpeed * elapsedTime);
+            speed += 5.0;
+            if(speed > 110)
+            {
+                speed = 110;
+            }
         }
         else if(Event.Key.Code == sf::Key::Down)
         {
-            cam.moveBackward(10.0 * elapsedTime);
+            //cam.moveBackward(moveSpeed * elapsedTime);
+            speed -= 5.0;
+            if(speed < 0)
+            {
+                speed = 0;
+            }
         }
         else if(Event.Key.Code == sf::Key::W)
         {
-            cam.moveUp(10.0 * elapsedTime);
+            cam.moveUp(moveSpeed * elapsedTime);
         }
         else if(Event.Key.Code == sf::Key::S)
         {
-            cam.moveDown(10.0 * elapsedTime);
+            cam.moveDown(moveSpeed * elapsedTime);
         }
     }
     else if(Event.Type == sf::Event::Resized)

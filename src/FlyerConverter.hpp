@@ -1,5 +1,6 @@
 #ifndef FLYERCONVERTER_H
 #define FLYERCONVERTER_H
+#define TILE_WIDTH 256.0
 int pos2tile(float const& pos);
 float tile2pos(int tile);
 float xpos2lat(float const& xpos,int zoom);

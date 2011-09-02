@@ -28,6 +28,8 @@ bool OSMConnection::getImage(int zoom, int x, int y)
             return true;
         }
     }
+    sf::Clock clock;
+    clock.Reset();
 
     CURL* curl;
     CURLcode res;
@@ -60,6 +62,8 @@ bool OSMConnection::getImage(int zoom, int x, int y)
 
         curl_easy_cleanup(curl);
         fclose(fp);
+        //std::cerr << "Downloaded " << url.str() << " (";
+        //std::cerr << clock.GetElapsedTime() << " seconds)" << std::endl;
     }
     else
     {

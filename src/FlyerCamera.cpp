@@ -19,17 +19,61 @@ void FlyerCamera::rotate(float const& angleDiff)
     }
     else if(angle < 0.0)
     {
-        angle = 2*M_PI + angle;
+        angle = 2*M_PI - angle;
     }
+}
+
+void FlyerCamera::tilt(float const& angleDiff)
+{
+    float const tiltLimit = M_PI / 4.0;
+
+    lensAngle += angleDiff;
+    if(lensAngle > tiltLimit)
+    {
+        lensAngle = tiltLimit;
+    }else if (lensAngle < -tiltLimit)
+    {
+        lensAngle = -tiltLimit;
+    }
+
+    if(lensAngle > 2*M_PI)
+    {
+        lensAngle = lensAngle - 2*M_PI;
+    }
+    else if(lensAngle < -2*M_PI)
+    {
+        lensAngle = 2*M_PI - lensAngle;
+    }
+}
+
+void FlyerCamera::setTilt(float const& tiltAngle)
+{
+    lensAngle = tiltAngle;
+}
+
+float const& FlyerCamera::getTilt()
+{
+    return lensAngle;
 }
 
 void FlyerCamera::look()
 {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    float xoff = sin(angle);
-    float zoff = cos(angle);
-    float yoff = 0.0;
+    float const xoff = sin(angle);
+    float const yoff = 0.0;
+    float const zoff = cos(angle);
+
+    float const rotatedAngle = angle + (M_PI / 2.0);
+    float const xrot = cos(lensAngle) * sin(rotatedAngle);
+    float const yrot = sin(lensAngle);
+    float const zrot = cos(lensAngle) * cos(rotatedAngle);
+
+    xup = yoff * zrot - zoff * yrot;
+    yup = zoff * xrot - xoff * zrot;
+    zup = xoff * yrot - yoff * xrot;
+
+    glMatrixMode(GL_MODELVIEW);
     gluLookAt(xpos,ypos,zpos,
             xpos+xoff,ypos+yoff,zpos+zoff,
             xup,yup,zup);

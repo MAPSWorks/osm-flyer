@@ -17,6 +17,7 @@ class FlyerWindow
 
     private:
         unsigned int zoom;
+        float speed;
         FlyerMap map;
         FlyerCamera cam;
         sf::RenderWindow App;
