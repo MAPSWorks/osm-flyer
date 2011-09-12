@@ -17,9 +17,14 @@ FlyerMap::~FlyerMap()
 {
 }
 
+/**
+ * paint a tile at the given opengl coordinates
+ */
 void FlyerMap::paint(float const& centerX, float const& centerZ)
 {
     glPushMatrix();
+    
+    // Only print tiles within a certain radius
     unsigned int const width = TILE_WIDTH;
     unsigned int const radius = width*5;
 
@@ -47,57 +52,20 @@ void FlyerMap::paint(float const& centerX, float const& centerZ)
     glPopMatrix();
 }
 
-size_t curl_to_string(void* ptr, size_t size, size_t nmemb, void* data)
-{
-    std::string* str = (std::string*) data;
-    char* cPtr = (char*) ptr;
-    for(size_t i=0; i<size*nmemb;++i)
-    {
-        (*str) += cPtr[i];
-    }
-    return size * nmemb;
-}
-
+/**
+ * Returns random altitude for given opengl coordinates
+ */
 float FlyerMap::getAltitude(float const& x, float const& z)
 {
     srand(x+z);
     float const factor = (double) rand() / RAND_MAX + 1;
     float const maxAltitude = 40;
     return factor * maxAltitude;
-    /*
-    float const lat = xpos2lat(z,zoom);
-    float const lon = zpos2long(x,zoom);
-    float altitude = 0.0;
-
-    CURL* curl;
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if(curl)
-    {
-        std::stringstream url;
-        url << "http://api.geonames.org/srtm3?";
-        url << "lat=" << lat << "&";
-        url << "lng=" << lon << "&";
-        url << "username=forestmb";
-        std::string altData;
-        curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,curl_to_string);
-        curl_easy_setopt(curl,CURLOPT_WRITEDATA,&altData);
-        curl_easy_setopt(curl,CURLOPT_URL,url.str().c_str());
-        res = curl_easy_perform(curl);
-        if(res)
-        {
-            std::cerr << "Unable to retrieve data from " << url.str() << std::endl;
-            return 0.0;
-        }
-        curl_easy_cleanup(curl);
-        altitude = atof(altData.c_str());
-    }
-
-    return altitude;
-    */
 }
 
+/**
+ * Use opengl to print a texture to a grid coordinate of the specified width
+ */
 void FlyerMap::printTile(GLuint tile,float x, float z, int w)
 {
     glBindTexture(GL_TEXTURE_2D,tile);

@@ -27,6 +27,9 @@ FlyerWindow::~FlyerWindow()
     }
 }
 
+/**
+ * Initializes window, opengl, and camera at the given coordinates
+ */
 void FlyerWindow::init(float const& lat, float const& lon)
 {
     App.Create(sf::VideoMode(800,600,32),"OpenStreetMap Flyer");
@@ -48,33 +51,46 @@ void FlyerWindow::init(float const& lat, float const& lon)
     cam.look();
 }
 
+/**
+ * Displays window and updates camera, processes events until
+ * window is closed
+ */
 void FlyerWindow::run()
 {
     App.SetActive();
     while(App.IsOpened())
     {
+        // Move camera forward
         float const elapsedTime = App.GetFrameTime();
         cam.moveForward(speed * elapsedTime);
-        bool isTurning = false;
+
+        // Handle any events that have occured
         sf::Event Event;
         while(App.GetEvent(Event))
         {
             processEvent(Event);
         }
 
+        // Update screen
         cam.look();
         paint();
         App.Display();
-        //std::cerr << (1.0 / App.GetFrameTime()) << std::endl;
     }
 }
 
+
+/**
+ * Paints map to window
+ */
 void FlyerWindow::paint()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     map.paint(cam.getX(),cam.getZ());
 }
 
+/**
+ * Update window for events
+ */
 void FlyerWindow::processEvent(sf::Event const& Event)
 {
     if(Event.Type == sf::Event::Closed)
@@ -102,7 +118,6 @@ void FlyerWindow::processEvent(sf::Event const& Event)
         }
         else if(Event.Key.Code == sf::Key::Up)
         {
-            //cam.moveForward(moveSpeed * elapsedTime);
             speed += 5.0;
             if(speed > 110)
             {
@@ -111,7 +126,6 @@ void FlyerWindow::processEvent(sf::Event const& Event)
         }
         else if(Event.Key.Code == sf::Key::Down)
         {
-            //cam.moveBackward(moveSpeed * elapsedTime);
             speed -= 5.0;
             if(speed < 0)
             {

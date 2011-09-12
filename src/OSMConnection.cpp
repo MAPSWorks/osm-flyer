@@ -3,19 +3,34 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #include <SFML/Graphics.hpp>
 #include "OSMConnection.hpp"
 
-OSMConnection::OSMConnection():cacheDir("/tmp/osmflyer/tiles/"),uri("http://a.tile.openstreetmap.org/")
+/**
+ * Creates cache directory if it does not exist using mkdir
+ */
+OSMConnection::OSMConnection():cacheDir(""),uri("http://a.tile.openstreetmap.org/")
 {
     char command[PATH_MAX];
+    struct passwd *pw = getpwuid(getuid());
+    std::string const homeDir(pw->pw_dir);
+    cacheDir = homeDir + "/.cache/osmflyer/tiles/";
+    
     sprintf(command,"mkdir -p %s",cacheDir.c_str());
     system(command);
 }
 
+/**
+ * Saves image into cache directory if it does not exist
+ */
 bool OSMConnection::getImage(int zoom, int x, int y)
 {
     std::string filename = getFilenameString(zoom,x,y);
+
+    // See if image is in directory already, return if it is
     FILE* fp = NULL;
     fp = fopen(filename.c_str(),"rb");
     if(fp != NULL)
@@ -28,9 +43,8 @@ bool OSMConnection::getImage(int zoom, int x, int y)
             return true;
         }
     }
-    sf::Clock clock;
-    clock.Reset();
 
+    // If not download image using curl
     CURL* curl;
     CURLcode res;
 
@@ -62,8 +76,6 @@ bool OSMConnection::getImage(int zoom, int x, int y)
 
         curl_easy_cleanup(curl);
         fclose(fp);
-        //std::cerr << "Downloaded " << url.str() << " (";
-        //std::cerr << clock.GetElapsedTime() << " seconds)" << std::endl;
     }
     else
     {
@@ -74,11 +86,14 @@ bool OSMConnection::getImage(int zoom, int x, int y)
     return true;
 }
 
+/**
+ * Return string for filename given the OSM parameters
+ */
 std::string OSMConnection::getFilenameString(int zoom, int x, int y)
 {
     std::stringstream format;
     format << cacheDir;
-    format << "osm-flyer-tile-" << zoom << "-" << x << "-" << y;
+    format << "tile-" << zoom << "-" << x << "-" << y;
     format << ".png";
     return format.str();
 }

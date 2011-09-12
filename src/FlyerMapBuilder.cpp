@@ -37,8 +37,12 @@ FlyerMapBuilder::~FlyerMapBuilder()
     builderThreadB.Wait();
 }
 
+/**
+ * Get the tile id for the OpenStreetMap coordinates
+ */
 int FlyerMapBuilder::getTile(int x,int y)
 {
+    // Load default texture if it has not been loaded yet
     if(0 == defaultTexture)
     {
         defaultTexture = loadTextureRAW("default.bmp");
@@ -85,11 +89,13 @@ int FlyerMapBuilder::getTile(int x,int y)
         }
     }
     
+    // Texture has not been found or is not being downloaded
     std::pair<int,int> newTile(x,y);
     {
         sf::Lock DownloadLock(DownloadMutex);
         downloadedTiles[x][y] = -1;
     }
+    // Put texture in queue to be downloaded
     {
         sf::Lock QueueLock(QueueMutex);
         tileQueue.push_back(newTile);
@@ -98,9 +104,13 @@ int FlyerMapBuilder::getTile(int x,int y)
     return defaultTexture;
 }
 
+/**
+ * Load opengl texture from filename
+ */
 GLuint FlyerMapBuilder::loadTextureRAW(std::string const& filename)
 {
     sf::Image TextureImage;
+    // If image can't be loaded, delete so it can be redownloaded
     if (!TextureImage.LoadFromFile(filename))
     {
         if(remove(filename.c_str()) != 0)
@@ -110,6 +120,7 @@ GLuint FlyerMapBuilder::loadTextureRAW(std::string const& filename)
         return 0;
     }
 
+    // load texture using pixel data from TextureImage
     GLuint texture = 0;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);

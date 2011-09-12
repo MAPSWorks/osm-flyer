@@ -1,3 +1,4 @@
+// Conversion functions for translating OSM, OpenGL, and Long/Lat coordinates
 #include <math.h>
 #include "FlyerConverter.hpp"
 

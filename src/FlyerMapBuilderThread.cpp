@@ -17,6 +17,9 @@ FlyerMapBuilderThread::~FlyerMapBuilderThread()
     building = false;
 }
 
+/**
+ * Thread worker loop. Downloads tiles as they appear in download queue
+ */
 void FlyerMapBuilderThread::Run()
 {
     building = true;
@@ -30,6 +33,7 @@ void FlyerMapBuilderThread::Run()
 
         if(hasTiles)
         {
+            // Get tile from queue
             std::pair<int,int> nextTile;
             {
                 sf::Lock QueueLock(QueueMutex);
@@ -40,6 +44,7 @@ void FlyerMapBuilderThread::Run()
             int x = nextTile.first;
             int y = nextTile.second;
 
+            // Download image  
             osmConn.getImage(zoom,x,y);
             {
                 sf::Lock DownloadLock(DownloadMutex);
@@ -52,11 +57,17 @@ void FlyerMapBuilderThread::Run()
     }
 }
 
+/**
+ * Get filename string from connection for the given parameters
+ */
 std::string FlyerMapBuilderThread::getFilenameString(int zoom,int x,int y)
 {
     return osmConn.getFilenameString(zoom,x,y);
 }
 
+/**
+ * Stops the worker loop if it is running
+ */
 void FlyerMapBuilderThread::stopBuilding()
 {
     building = false;

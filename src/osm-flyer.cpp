@@ -1,3 +1,4 @@
+// Entry point for osm-flyer application
 #include <iostream>
 #include "FlyerWindow.hpp"
 
